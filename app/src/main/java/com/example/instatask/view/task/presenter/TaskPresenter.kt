@@ -4,7 +4,7 @@ import android.app.Activity
 import com.example.instatask.view.task.TaskExecutor
 import java.util.concurrent.Executors
 
-class TaskPresenter(private val activity: Activity,private val viewListener: TaskContract.View) :
+class TaskPresenter(private val activity: Activity, private val viewListener: TaskContract.View) :
     TaskContract.Presenter {
     override fun requestData() {
         val executor = Executors.newScheduledThreadPool(2)

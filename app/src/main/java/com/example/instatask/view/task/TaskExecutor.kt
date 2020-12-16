@@ -5,10 +5,11 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.util.Log
-import com.example.instatask.view.task.presenter.TaskContract
 import com.example.instatask.data.Word
 import com.example.instatask.utils.AppState
+import com.example.instatask.view.task.presenter.TaskContract
 import org.jsoup.Jsoup
+import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -20,12 +21,12 @@ class TaskExecutor(private val activity: Activity, private val viewListener: Tas
     override fun run() {
         super.run()
 
-        if (hasInternet()){
             try {
                 url = URL("https://instabug.com")
                 httpURLConnection = url.openConnection() as HttpURLConnection?
-                httpURLConnection?.defaultUseCaches = true
-                httpURLConnection?.useCaches = true
+                httpURLConnection?.defaultUseCaches = false
+                httpURLConnection?.addRequestProperty("Accept", "application/json")
+                httpURLConnection?.addRequestProperty("Cache-Control", "max-age=0")
                 val text = httpURLConnection?.inputStream?.bufferedReader()?.readText()
                 val data = Jsoup.parse(text).text()
                 Log.d("UrlTest", data.toString())
@@ -39,21 +40,19 @@ class TaskExecutor(private val activity: Activity, private val viewListener: Tas
             } finally {
                 httpURLConnection?.disconnect()
             }
-        }else{
-            viewListener.receiveData(ArrayList(), AppState.NO_INTERNET)
-        }
     }
 
     private fun getAllItems(data: String) : ArrayList<Word>{
         val array = data.split(" ")
         val map = HashMap<String, Int>()
         for (i in array.indices){
-            if(map.containsKey(array[i].toLowerCase())){
-                val counter : Int? = map[array[i].toLowerCase()]!! + 1
-                map[array[i].toLowerCase()] = counter!!
+            val key = array[i].toLowerCase()
+            if(map.containsKey(key)){
+                val counter : Int? = map[key]!! + 1
+                map[key] = counter!!
             }else{
                 val counter = 1
-                map[array[i].toLowerCase()] = counter
+                map[key] = counter
             }
         }
         val list = ArrayList<Word>()
